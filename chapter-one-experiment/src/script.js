@@ -4,6 +4,12 @@ import { PointerLockControls } from "three/examples/jsm/controls/PointerLockCont
 // Constants
 const BLOCK_HEIGHT = 1;
 const GRID_SIZE = 20;
+const CLOCK = new THREE.Clock();
+const RAYCASTER = new THREE.Raycaster();
+const FLOOR_DIRECTION = new THREE.Vector3(0, -1, 0); // Direction pointing down (for block collisions)
+const MOVING_SPEED = 0.05;
+const ACCELERATION = 0.05;
+var ySpeed = 0;
 
 // Textures
 const textureLoader = new THREE.TextureLoader();
@@ -54,9 +60,7 @@ scene.add(camera);
 
 // Controls
 const controls = new PointerLockControls(camera, canvas);
-const movingSpeed = 0.05;
-const acceleration = 0.01;
-var ySpeed = 0;
+
 canvas.addEventListener("click", () => {
   controls.lock();
 });
@@ -76,14 +80,13 @@ class Block {
     this.y = y;
     this.z = z;
 
+
     const blockBox = new THREE.BoxGeometry(1, 1, 1);
     blockBox.center();
     const blockMaterials = [];
 
-    // Set the materials for each face of the box
     for (let i = 0; i < 6; i++) {
       if (i === 2) {
-        // Use topTexture for the top face (index 4)
         blockMaterials.push(
           new THREE.MeshStandardMaterial({
             map: topTexture,
@@ -100,6 +103,8 @@ class Block {
         );
       }
     }
+    this.originalMaterial = blockMaterials; 
+
 
     const blockMesh = new THREE.Mesh(blockBox, blockMaterials);
     blockMesh.position.set(this.x, this.y, this.z);
@@ -112,11 +117,11 @@ class Block {
 
 // Functions
 const checkCollisions = () => {
-  raycaster.set(camera.position, direction);
+  RAYCASTER.set(camera.position, FLOOR_DIRECTION);
   const intersectableObjects = blocks
     .filter((block) => block.mesh.children.length > 0)
     .map((block) => block.mesh.children[0]);
-  const intersections = raycaster.intersectObjects(intersectableObjects, true);
+  const intersections = RAYCASTER.intersectObjects(intersectableObjects, true);
   if (intersections.length > 0) {
     const intersection = intersections[0];
     const distance = intersection.distance;
@@ -126,6 +131,60 @@ const checkCollisions = () => {
     }
   }
 };
+
+const highlightMaterial = new THREE.MeshBasicMaterial({
+  color: 0xffffff,
+});
+
+const checkBlockCollision = () => {
+  RAYCASTER.set(camera.position, camera.getWorldDirection(new THREE.Vector3()));
+  const intersectableObjects = blocks
+    .filter((block) => block.mesh.children.length > 0)
+    .map((block) => block.mesh.children[0]);
+  const intersections = RAYCASTER.intersectObjects(intersectableObjects, true);
+  let blockFound = false;
+
+  if (intersections.length > 0) {
+    const intersection = intersections[0];
+    const distance = intersection.distance;
+    if (distance < 2) {
+      const block = blocks.find(
+        (block) => block.mesh.children[0] === intersection.object
+      );
+      if (block) {
+        block.mesh.children[0].material = highlightMaterial;
+        blockFound = true;
+
+        if (keys["e"]) {
+          // destroy block
+          block.mesh.remove(block.mesh.children[0]);
+          blocks.splice(blocks.indexOf(block), 1);
+        }
+      }
+    }
+  }
+
+  if (!blockFound) {
+    blocks.forEach((block) => {
+      block.mesh.children[0].material = block.originalMaterial;
+    });
+  }
+};
+
+//DRAW CROSSHAIR
+const crosshair = new THREE.Mesh(
+  new THREE.BoxGeometry(0.04, 0.04, 1),
+  new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    opacity: 0.5,
+    transparent: true,
+  })
+);
+//SET CROSSHAIR ALWAYS VISIBLE
+crosshair.position.x = 0;
+crosshair.position.y = 0;
+crosshair.position.z = -2;
+camera.add(crosshair);
 
 // Generate Blocks
 const blocks = [];
@@ -157,11 +216,6 @@ document.body.addEventListener("keyup", (e) => {
   keys[e.key] = false;
 });
 
-// Animation loop
-const clock = new THREE.Clock();
-const raycaster = new THREE.Raycaster();
-const direction = new THREE.Vector3(0, -1, 0); // Direction pointing down (for block collisions)
-
 // Skybox
 
 const vertexShader = document.getElementById("vertexShader").textContent;
@@ -179,26 +233,27 @@ const skybox = new THREE.Mesh(skyboxGeo, skyboxMaterial);
 scene.add(skybox);
 
 const tick = () => {
-  const elapsedTime = clock.getElapsedTime();
+  const elapsedTime = CLOCK.getElapsedTime();
 
   // Update controls
   if (keys["w"]) {
-    controls.moveForward(movingSpeed);
+    controls.moveForward(MOVING_SPEED);
   }
   if (keys["s"]) {
-    controls.moveForward(-1 * movingSpeed);
+    controls.moveForward(-1 * MOVING_SPEED);
   }
   if (keys["a"]) {
-    controls.moveRight(-1 * movingSpeed);
+    controls.moveRight(-1 * MOVING_SPEED);
   }
   if (keys["d"]) {
-    controls.moveRight(movingSpeed);
+    controls.moveRight(MOVING_SPEED);
   }
 
   // Update camera position and check collisions
   camera.position.y -= ySpeed;
-  ySpeed += acceleration;
+  ySpeed += ACCELERATION;
   checkCollisions();
+  checkBlockCollision();
 
   // Render
   renderer.render(scene, camera);
