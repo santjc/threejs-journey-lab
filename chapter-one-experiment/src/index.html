@@ -8,8 +8,31 @@
   </head>
   <body>
     <canvas class="webgl"></canvas>
+
     <script type="module" src="./script.js"></script>
     <script src="./utils/perlin.js"></script>
+    <script type="x-shader/x-vertex" id="vertexShader">
+      varying vec3 vWorldPosition;
 
+      void main() {
+        vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+        vWorldPosition = worldPosition.xyz;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+      }
+    </script>
+
+    <script type="x-shader/x-fragment" id="fragmentShader">
+      varying vec3 vWorldPosition;
+
+      void main() {
+        // Normaliza la posición del vértice en el rango [0, 1]
+        vec3 normPosition = normalize(vWorldPosition) * 0.5 + 0.5;
+
+        // Interpola entre los colores del cielo
+        vec3 color = mix(vec3(0.53, 0.81, 0.98), vec3(0.8, 0.95, 1.0), normPosition.y);
+
+        gl_FragColor = vec4(color, 1.0);
+      }
+    </script>
   </body>
 </html>

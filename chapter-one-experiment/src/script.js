@@ -1,45 +1,20 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls.js";
-import * as dat from "lil-gui";
-class Block {
-  constructor(x, y, z) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
 
-    const blockBox = new THREE.BoxGeometry(1, 1, 1);
-    blockBox.center();
-    const blockMaterial = new THREE.MeshStandardMaterial({
-      map: dirtTexture,
-    });
-    const blockMesh = new THREE.Mesh(blockBox, blockMaterial);
-    blockMesh.position.set(this.x, this.y, this.z);
-
-    const edges = new THREE.EdgesGeometry(blockBox);
-    const line = new THREE.LineSegments(
-      edges,
-      new THREE.LineBasicMaterial({ color: 0x000000 })
-    );
-    line.position.set(this.x, this.y, this.z);
-
-    this.mesh = new THREE.Group();
-    this.mesh.add(blockMesh, line);
-    scene.add(this.mesh);
-  }
-}
-THREE.ColorManagement.enabled = false;
-
-/**
- * Base
- */
-// Debug
-const gui = new dat.GUI();
+// Constants
+const BLOCK_HEIGHT = 1;
+const GRID_SIZE = 20;
 
 // Textures
 const textureLoader = new THREE.TextureLoader();
 const dirtTexture = textureLoader.load("/textures/dirt.png");
+const grassDirtTexture = textureLoader.load("/textures/grass_dirt.jpeg");
+const grassTexture = textureLoader.load("/textures/grass.jpeg");
+
 dirtTexture.magFilter = THREE.NearestFilter;
-dirtTexture.minFilter = THREE.NearestFilter;
+dirtTexture.minFilter = THREE.LinearMipMapLinearFilter;
+grassDirtTexture.magFilter = THREE.NearestFilter;
+grassDirtTexture.minFilter = THREE.LinearMipMapLinearFilter;
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -47,71 +22,27 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
-/**
- * Lights
- */
+// Lights
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-const pointlight = new THREE.PointLight(0xffffff, 0.75);
+const pointLight = new THREE.PointLight(0xffffff, 0.75);
+pointLight.position.y = 15;
+scene.add(pointLight, ambientLight);
 
-pointlight.position.y = 15;
-
-scene.add(pointlight, ambientLight);
-
-/**
- * Objects
- */
-const gridSize = 25;
-const blocks = [];
-const blockHeight = 1; // Altura de cada bloque
-
-for (let x = -gridSize; x < gridSize; x++) {
-  for (let z = -gridSize; z < gridSize; z++) {
-    const perlinValue = noise.perlin3(x * 0.1, 0, z * 0.1);
-    const height = Math.floor(perlinValue * 5) * blockHeight;
-    const block = new Block(x, height - 10, z);
-    blocks.push(block);
-  }
-}
-
-// Movement
-const keys = {};
-document.body.addEventListener("keydown", (e) => {
-  keys[e.key] = true;
-  if (e.key === " ") {
-    ySpeed = -0.3;
-  }
-});
-
-document.body.addEventListener("keyup", (e) => {
-  keys[e.key] = false;
-});
-
-/**
- * Sizes
- */
+// Camera
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 };
-
 window.addEventListener("resize", () => {
-  // Update sizes
   sizes.width = window.innerWidth;
   sizes.height = window.innerHeight;
 
-  // Update camera
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  // Update renderer
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
-
-/**
- * Camera
- */
-// Base camera
 const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
@@ -130,21 +61,7 @@ canvas.addEventListener("click", () => {
   controls.lock();
 });
 
-controls.addEventListener("lock", () => {
-  console.log("lock");
-});
-
-controls.addEventListener("unlock", () => {
-  console.log("unlock");
-});
-
-// Raycaster
-const raycaster = new THREE.Raycaster();
-const direction = new THREE.Vector3(0, -1, 0); // Dirección hacia abajo (colisiones con bloques)
-
-/**
- * Renderer
- */
+// Renderer
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
 });
@@ -152,16 +69,53 @@ renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-/**
- * Animate
- */
-const clock = new THREE.Clock();
+// Block class
+class Block {
+  constructor(x, y, z, texture, topTexture) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
 
+    const blockBox = new THREE.BoxGeometry(1, 1, 1);
+    blockBox.center();
+    const blockMaterials = [];
+
+    // Set the materials for each face of the box
+    for (let i = 0; i < 6; i++) {
+      if (i === 2) {
+        // Use topTexture for the top face (index 4)
+        blockMaterials.push(
+          new THREE.MeshStandardMaterial({
+            map: topTexture,
+            side: THREE.FrontSide,
+          })
+        );
+      } else {
+        // Use texture for other faces
+        blockMaterials.push(
+          new THREE.MeshStandardMaterial({
+            map: texture,
+            side: THREE.FrontSide,
+          })
+        );
+      }
+    }
+
+    const blockMesh = new THREE.Mesh(blockBox, blockMaterials);
+    blockMesh.position.set(this.x, this.y, this.z);
+
+    this.mesh = new THREE.Group();
+    this.mesh.add(blockMesh);
+    scene.add(this.mesh);
+  }
+}
+
+// Functions
 const checkCollisions = () => {
   raycaster.set(camera.position, direction);
   const intersectableObjects = blocks
     .filter((block) => block.mesh.children.length > 0)
-    .map((block) => block.mesh.children[0]); // Filtrar solo los bloques con geometría válida
+    .map((block) => block.mesh.children[0]);
   const intersections = raycaster.intersectObjects(intersectableObjects, true);
   if (intersections.length > 0) {
     const intersection = intersections[0];
@@ -173,6 +127,56 @@ const checkCollisions = () => {
   }
 };
 
+// Generate Blocks
+const blocks = [];
+
+for (let x = -GRID_SIZE; x < GRID_SIZE; x++) {
+  for (let z = -GRID_SIZE; z < GRID_SIZE; z++) {
+    const perlinValue = noise.perlin3(x * 0.1, 0, z * 0.1);
+    const height = Math.floor(perlinValue * 6) * BLOCK_HEIGHT;
+    const texture = height >= 0 ? grassDirtTexture : dirtTexture;
+
+    // Pass the grassTexture as topTexture for blocks with a positive height
+    const topTexture = height >= 0 ? grassTexture : dirtTexture;
+
+    const block = new Block(x, height - 10, z, texture, topTexture);
+    blocks.push(block);
+  }
+}
+
+// Event listeners
+const keys = {};
+document.body.addEventListener("keydown", (e) => {
+  keys[e.key] = true;
+  if (e.key === " ") {
+    ySpeed = -0.25;
+  }
+});
+
+document.body.addEventListener("keyup", (e) => {
+  keys[e.key] = false;
+});
+
+// Animation loop
+const clock = new THREE.Clock();
+const raycaster = new THREE.Raycaster();
+const direction = new THREE.Vector3(0, -1, 0); // Direction pointing down (for block collisions)
+
+// Skybox
+
+const vertexShader = document.getElementById("vertexShader").textContent;
+const fragmentShader = document.getElementById("fragmentShader").textContent;
+
+const skyboxMaterial = new THREE.ShaderMaterial({
+  vertexShader: vertexShader,
+  fragmentShader: fragmentShader,
+  side: THREE.BackSide,
+});
+
+// Crear el skybox
+const skyboxGeo = new THREE.BoxGeometry(50, 50, 50);
+const skybox = new THREE.Mesh(skyboxGeo, skyboxMaterial);
+scene.add(skybox);
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
