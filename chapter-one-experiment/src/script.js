@@ -10,7 +10,7 @@ const FLOOR_DIRECTION = new THREE.Vector3(0, -1, 0); // Direction pointing down 
 const MOVING_SPEED = 0.05;
 const ACCELERATION = 0.05;
 var ySpeed = 0;
-
+var isGrounded = false;
 // Textures
 const textureLoader = new THREE.TextureLoader();
 const dirtTexture = textureLoader.load("/textures/dirt.png");
@@ -80,7 +80,6 @@ class Block {
     this.y = y;
     this.z = z;
 
-
     const blockBox = new THREE.BoxGeometry(1, 1, 1);
     blockBox.center();
     const blockMaterials = [];
@@ -103,8 +102,7 @@ class Block {
         );
       }
     }
-    this.originalMaterial = blockMaterials; 
-
+    this.originalMaterial = blockMaterials;
 
     const blockMesh = new THREE.Mesh(blockBox, blockMaterials);
     blockMesh.position.set(this.x, this.y, this.z);
@@ -123,10 +121,11 @@ const checkCollisions = () => {
     .map((block) => block.mesh.children[0]);
   const intersections = RAYCASTER.intersectObjects(intersectableObjects, true);
   if (intersections.length > 0) {
+    isGrounded = true;
     const intersection = intersections[0];
     const distance = intersection.distance;
-    if (distance < 2) {
-      camera.position.y = intersection.point.y + 1.5;
+    if (distance < 1.5 && isGrounded) {
+      camera.position.y = intersection.point.y + 1.5; 
       ySpeed = 0;
     }
   }
@@ -208,6 +207,7 @@ const keys = {};
 document.body.addEventListener("keydown", (e) => {
   keys[e.key] = true;
   if (e.key === " ") {
+    isGrounded = false;
     ySpeed = -0.25;
   }
 });
