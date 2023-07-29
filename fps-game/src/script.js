@@ -1,3 +1,4 @@
+import { PlayerController } from "./classes/player-controller";
 import { threejs_component } from "./classes/threejs-component";
 import * as THREE from "three";
 class BasicFPS {

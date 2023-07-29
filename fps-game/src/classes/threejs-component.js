@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { Component } from "./component.js";
+import { PlayerController } from "./player-controller.js";
 export const threejs_component = (() => {
   class ThreeJSController extends Component {
     constructor() {
@@ -15,6 +16,7 @@ export const threejs_component = (() => {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(this.renderer.domElement);
       this.clock = new THREE.Clock();
+      this.playerController = new PlayerController(this.camera);
     }
 
     onWindowResize() {
@@ -44,6 +46,7 @@ export const threejs_component = (() => {
       const delta = this.clock.getDelta();
 
       this.renderer.render(this.scene, this.camera);
+      this.playerController.update();
 
       requestAnimationFrame(this.render.bind(this));
     }
