@@ -1,3 +1,4 @@
+import { clamp } from "three/src/math/MathUtils";
 
 class InputController {
   constructor() {

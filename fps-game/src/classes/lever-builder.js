@@ -10,8 +10,11 @@ class LevelBuilder extends Component {
   }
 
   BuildSandbox() {
-    const geometry = new THREE.PlaneGeometry(25, 25, 2);
-    const material = new THREE.MeshStandardMaterial({ color: 0xff00ff });
+    const geometry = new THREE.BoxGeometry(25, 25, 0.1, 8, 8);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xff00ff,
+      wireframe: true,
+    });
     const floor = new THREE.Mesh(geometry, material);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -1;
@@ -25,9 +28,12 @@ class LevelBuilder extends Component {
     this.scene.add(box);
 
     if (this.physicsWorld) {
-      const shape = new CANNON.Plane();
-      const body = new CANNON.Body({ mass: 0, shape: shape });
-      body.position.set(0, -1, 0);
+      const shape = new CANNON.Box(new CANNON.Vec3(15, 15, 0.1));
+      const body = new CANNON.Body({
+        mass: 0,
+        shape: shape,
+        position: new CANNON.Vec3(0, -1, 0),
+      });
       body.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
       body.threeMesh = floor;
       this.physicsWorld.addBody(body);

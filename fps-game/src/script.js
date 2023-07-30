@@ -38,7 +38,10 @@ class BasicFPS {
     sandbox.BuildSandbox();
   }
   CreateCamera() {
-    this.fpsCamera = new CameraController(this.threeJSController.camera);
+    this.fpsCamera = new CameraController(
+      this.threeJSController.camera,
+      this.physics
+    );
   }
 
   CreatePhysics() {
@@ -47,10 +50,9 @@ class BasicFPS {
 
   Step() {
     const delta = this.clock.getDelta();
-    const timeElapsed = this.clock.getElapsedTime();
     this.threeJSController.update();
-    this.fpsCamera.update(timeElapsed * delta);
-    this.physics.update();
+    this.fpsCamera.update(delta);
+    this.physics.update(delta);
     requestAnimationFrame(() => this.Step());
   }
 }

@@ -1,5 +1,6 @@
 import { Component } from "./component.js";
 import * as THREE from "three";
+import * as CANNON from "cannon-es";
 import { InputController } from "./input-controller.js";
 import { KEYS } from "../utils/keys.js";
 function clamp(x, a, b) {
@@ -7,18 +8,21 @@ function clamp(x, a, b) {
 }
 
 class CameraController extends Component {
-  constructor(camera) {
+  constructor(camera, world) {
     super();
     this.camera = camera;
     this.input = new InputController();
-    this.position = new THREE.Vector3();
+    this.position = new THREE.Vector3(0, 0.5, 0);
     this.phi = 0;
-    this.phiSpeed = 3;
+    this.phiSpeed = 2;
 
     this.theta = 0;
-    this.thetaSpeed = 0.5;
+    this.thetaSpeed = 1;
 
-    this.movementSpeed = 1.5;
+    this.movementSpeed = 5;
+
+    this.world = world;
+    this.createPhysicsBody();
   }
 
   update(elapsedTime) {
@@ -28,9 +32,18 @@ class CameraController extends Component {
     this.input.update(elapsedTime);
   }
 
+  createPhysicsBody() {
+    const shape = new CANNON.Box(new CANNON.Vec3(1, 1, 1));
+    this.body = new CANNON.Body({ mass: 1 });
+    this.body.addShape(shape);
+    this.world.addBody(this.body);
+  }
+
   updateCamera() {
     this.camera.quaternion.copy(this.rotation);
     this.camera.position.copy(this.position);
+
+    this.body.position.copy(this.position);
   }
 
   updatePosition(elapsedTime) {

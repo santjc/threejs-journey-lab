@@ -6,13 +6,11 @@ class PhysicsController extends Component {
   constructor() {
     super();
     this.world = new CANNON.World();
-    this.clock = new THREE.Clock();
     this.bodies = [];
     this.world.gravity.set(0, -9.82, 0);
   }
 
-  update() {
-    const delta = this.clock.getDelta();
+  update(delta) {
     this.bodies.forEach((body) => {
       if (body.threeMesh) {
         body.threeMesh.position.copy(body.position);
