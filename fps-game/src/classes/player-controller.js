@@ -1,30 +1,42 @@
 import * as THREE from "three";
+import * as CANNON from "cannon-es";
+import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls.js";
 import { Component } from "./component";
 
 class PlayerController extends Component {
-  constructor(camera) {
+  constructor(camera, physicsWorld) {
     super();
     this.camera = camera;
+    this.physicsWorld = physicsWorld;
     this.speed = 0.1;
-    this.rotationSpeed = 0.05;
-
-    this.camera.position.set(0, 5, 10);
-    this.camera.lookAt(0, 0, 0);
 
     this.moveForward = false;
     this.moveBackward = false;
     this.moveLeft = false;
     this.moveRight = false;
 
+    this.controls = new PointerLockControls(this.camera, document.body);
+
     document.addEventListener("keydown", this.onKeyDown.bind(this), false);
     document.addEventListener("keyup", this.onKeyUp.bind(this), false);
-    //document.addEventListener("mousemove", this.onMouseMove.bind(this), false);
-    this.mouseX = 0;
-    this.mouseY = 0;
+
+    document.addEventListener(
+      "click",
+      () => {
+        this.controls.lock();
+      },
+      false
+    );
+    this.Init();
   }
 
+  Init() {
+    const playerShape = new CANNON.Box(new CANNON.Vec3(0.5, 1, 0.5));
+    this.playerBody = new CANNON.Body({ mass: 1, shape: playerShape });
+    this.playerBody.position.set(0, 2, 0);
+    this.physicsWorld.AddBody(this.playerBody);
+  }
   onKeyDown(event) {
-    console.log(event.keyCode);
     switch (event.keyCode) {
       case 87: // W key (Forward)
         this.moveForward = true;
@@ -58,21 +70,10 @@ class PlayerController extends Component {
     }
   }
 
-  onMouseMove(event) {
-    // Obtener las coordenadas del mouse relativas al centro de la ventana
-    this.mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-    this.mouseY = (event.clientY / window.innerHeight) * 2 - 1;
-
-    // Actualizar la rotación del jugador en función de las coordenadas del mouse
-    this.camera.rotation.y += this.rotationSpeed * this.mouseX;
-    this.camera.rotation.x += this.rotationSpeed * this.mouseY;
-  }
-
   update() {
-    // Actualizar la posición y la rotación del jugador en cada frame
     const moveDirection = new THREE.Vector3();
-    if (this.moveForward) moveDirection.z -= 1;
-    if (this.moveBackward) moveDirection.z += 1;
+    if (this.moveForward) moveDirection.z += 1;
+    if (this.moveBackward) moveDirection.z -= 1;
     if (this.moveLeft) moveDirection.x -= 1;
     if (this.moveRight) moveDirection.x += 1;
 
@@ -80,7 +81,9 @@ class PlayerController extends Component {
     moveDirection.applyQuaternion(this.camera.quaternion);
     moveDirection.multiplyScalar(this.speed);
 
-    this.camera.position.add(moveDirection);
+    this.controls.moveForward(moveDirection.z);
+    this.controls.moveRight(moveDirection.x);
   }
 }
+
 export { PlayerController };
