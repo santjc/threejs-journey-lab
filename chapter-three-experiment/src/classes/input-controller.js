@@ -37,11 +37,6 @@ class InputController {
   onMouseMove(e) {
     this.current.mouseX = e.pageX - window.innerWidth / 2;
     this.current.mouseY = e.pageY - window.innerHeight / 2;
-
-    if (this.previous === null) {
-      this.previous = { ...this.current };
-    }
-
     this.current.mouseXDelta = this.current.mouseX - this.previous.mouseX;
     this.current.mouseYDelta = this.current.mouseY - this.previous.mouseY;
   }

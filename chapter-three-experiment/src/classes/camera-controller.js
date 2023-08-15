@@ -76,7 +76,6 @@ class CameraController extends Component {
       -Math.PI * 0.3,
       Math.PI * 0.3
     );
-
     const qx = new THREE.Quaternion();
     qx.setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.phi);
 
