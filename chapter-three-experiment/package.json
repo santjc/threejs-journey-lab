@@ -12,7 +12,9 @@
     "vite": "^4.3.9"
   },
   "dependencies": {
+    "cannon-es-debugger": "^1.0.0",
     "lil-gui": "^0.18.2",
+    "simplex-noise": "^4.0.1",
     "three": "^0.153.0"
   }
 }
