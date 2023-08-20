@@ -6,11 +6,13 @@ import { CameraController } from "./classes/camera-controller";
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
 import CannonDebugger from "cannon-es-debugger";
+import { ShooterController } from "./classes/shooter-controller";
 
 class BasicFPS {
   constructor() {
     this.scene = null;
     this.threeJSController = null;
+    this.shooterController = null;
     this.clock = new THREE.Clock();
     this.canvas = document.querySelector("canvas.webgl");
     this.cannonDebugger = null;
@@ -20,9 +22,9 @@ class BasicFPS {
   Init() {
     this.InitRenderer();
     this.CreatePhysics();
-
     this.CreateScene();
     this.CreateCamera();
+    this.CreateShooterController();
     this.Step();
   }
 
@@ -48,6 +50,19 @@ class BasicFPS {
     );
   }
 
+  CreateShooterController() {
+    this.shooterController = new ShooterController(
+      this.fpsCamera.camera,
+      this.scene,
+      this.physics
+    );
+    document.addEventListener("keydown", (event) => {
+      if (event.code === "Space") {
+        this.shooterController.Shoot();
+      }
+    });
+  }
+
   CreatePhysics() {
     this.physics = new PhysicsController();
   }
@@ -61,6 +76,7 @@ class BasicFPS {
     this.threeJSController.update();
     this.fpsCamera.update(delta);
     this.physics.update(delta);
+    this.shooterController.update(delta);
     requestAnimationFrame(() => this.Step());
   }
 }
