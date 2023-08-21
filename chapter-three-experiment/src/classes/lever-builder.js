@@ -8,6 +8,7 @@ class LevelBuilder extends Component {
     super();
     this.scene = scene;
     this.physicsWorld = physicsWorld;
+    this.textureLoader = new THREE.TextureLoader();
   }
 
   BuildSandbox() {
@@ -32,10 +33,40 @@ class LevelBuilder extends Component {
   }
 
   createTerrain() {
+    const terrainTexture = this.textureLoader.load("/textures/dirtColor.jpg");
+    // Improve texture quality
+    terrainTexture.magFilter = THREE.NearestFilter;
+    terrainTexture.minFilter = THREE.LinearMipMapLinearFilter;
+    //Make texture smaller
+    terrainTexture.repeat.set(50, 50);
+    terrainTexture.wrapS = THREE.RepeatWrapping;
+    terrainTexture.wrapT = THREE.RepeatWrapping;
+    const terrainNormalTexture = this.textureLoader.load(
+      "/textures/dirtNormal.jpg"
+    );
+    const terrainRoughnessTexture = this.textureLoader.load(
+      "/textures/dirtRoughness.jpg"
+    );
+    const terrainHeightTexture = this.textureLoader.load(
+      "/textures/dirtHeight.png"
+    );
+    const terrainAmbientOcclusionTexture = this.textureLoader.load(
+      "/textures/dirtAO.jpg"
+    );
+
     const terrainGeometry = new THREE.PlaneGeometry(50, 50, 128, 128);
     const terrainMaterial = new THREE.MeshStandardMaterial({
-      color: 0x00ff00,
+      color: 0x74663b,
       wireframe: false,
+      map: terrainTexture,
+      normalMap: terrainNormalTexture,
+      roughnessMap: terrainRoughnessTexture,
+      displacementMap: terrainHeightTexture,
+      aoMap: terrainAmbientOcclusionTexture,
+      displacementScale: 0.1,
+      aoMapIntensity: 1,
+      roughness: 1,
+      metalness: 0,
     });
     const noise2D = createNoise2D();
 
@@ -51,7 +82,7 @@ class LevelBuilder extends Component {
     for (let i = 0; i < positionAttribute.count; i++) {
       const vertex = new THREE.Vector3();
       vertex.fromBufferAttribute(positionAttribute, i);
-      vertex.z = noise2D(vertex.x, vertex.y) * 0.25;
+      vertex.z = noise2D(vertex.x, vertex.y) * 0.1;
       positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
     }
     positionAttribute.needsUpdate = true;
@@ -95,9 +126,17 @@ class LevelBuilder extends Component {
   }
 
   addLight() {
-    const light = new THREE.AmbientLight(0x404040, 0.5);
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.75);
-    this.scene.add(light, directionalLight);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+    this.scene.add(ambientLight);
+
+    const moonLight = new THREE.DirectionalLight(0x0055a5, 0.7);
+    moonLight.position.set(0, 5, 10);
+    moonLight.castShadow = true;
+    this.scene.add(moonLight);
+
+    // Spotlight
+    const fog = new THREE.Fog(0x000000, 5, 20);
+    this.scene.fog = fog;
   }
 }
 

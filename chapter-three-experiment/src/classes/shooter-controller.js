@@ -15,7 +15,7 @@ class ShooterController extends Component {
   Shoot() {
     const bullet = new Bullet(
       this.camera.position.clone(),
-      this.camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(10),
+      this.camera,
       this.scene,
       this.physicsWorld
     );
@@ -27,6 +27,9 @@ class ShooterController extends Component {
   update(deltaTime) {
     this.bullets.forEach((bullet) => {
       bullet.update(deltaTime);
+      if (bullet.destroy) {
+        this.bullets.splice(this.bullets.indexOf(bullet), 1);
+      }
     });
   }
 }

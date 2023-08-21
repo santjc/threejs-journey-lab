@@ -46,7 +46,8 @@ class BasicFPS {
     this.fpsCamera = new CameraController(
       this.threeJSController.camera,
       this.physics,
-      this.canvas
+      this.canvas,
+      this.scene
     );
   }
 

@@ -2,10 +2,10 @@ import { Component } from "./component";
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
 class Bullet extends Component {
-  constructor(position, velocity, scene, physicsWorld) {
+  constructor(position, camera, scene, physicsWorld) {
     super();
     this.position = position;
-    this.velocity = velocity;
+    this.camera = camera;
     this.scene = scene;
     this.physicsWorld = physicsWorld;
     this.mesh = new THREE.Mesh(
@@ -14,26 +14,39 @@ class Bullet extends Component {
     );
     this.mesh.position.copy(this.position);
     this.destroy = false;
+
+    this.collide = false;
+
     this.addPhysics();
+    this.handleCollisionBound = this.handleCollision.bind(this);
+    this.body.addEventListener("collide", this.handleCollisionBound);
   }
   addPhysics() {
     const shape = new CANNON.Sphere(0.1);
-    this.body = new CANNON.Body({ mass: 1 });
-    this.body.addShape(shape);
+    this.body = new CANNON.Body({ mass: 1, shape: shape });
+    this.body.threeMesh = this.mesh;
     this.body.position.copy(this.position);
-    this.body.velocity.copy(this.velocity);
+
+    const velocity = new THREE.Vector3();
+    this.camera.getWorldDirection(velocity);
+    velocity.multiplyScalar(20);
+    this.body.velocity.copy(velocity);
+
     this.physicsWorld.addBody(this.body);
   }
 
   update(deltaTime) {
-    this.position.add(this.velocity.clone().multiplyScalar(deltaTime));
-    this.mesh.position.copy(this.position);
-    if (this.body) {
-      this.body.position.copy(this.position);
-      this.body.addEventListener("collide", (event) => {
-        this.destroy = true;
-      });
-    }
+    this.position.copy(this.body.position);
+  }
+  handleCollision(event) {
+    console.log(event, "event");
+    this.collide = true;
+    this.Destroy();
+  }
+
+  Destroy() {
+    this.destroy = true;
+    this.body.removeEventListener("collide", this.handleCollisionBound);
   }
 }
 

@@ -9,10 +9,12 @@ function clamp(x, a, b) {
 }
 
 class CameraController extends Component {
-  constructor(camera, world, canvas) {
+  constructor(camera, world, canvas, scene) {
     super();
     this.canvas = canvas;
+    this.scene = scene;
     this.camera = camera;
+    this.light = null;
     this.input = new InputController();
     this.position = new THREE.Vector3(0, 0.5, 0);
     this.controls = new PointerLockControls(this.camera, this.canvas);
@@ -36,6 +38,9 @@ class CameraController extends Component {
 
   createPhysicsBody() {
     const shape = new CANNON.Box(new CANNON.Vec3(1, 1, 1));
+    const pointLight = new THREE.PointLight(0xffffff, 1, 3);
+    this.light = pointLight;
+    this.scene.add(this.light);
     this.body = new CANNON.Body({ mass: 1 });
     this.body.addShape(shape);
     this.world.addBody(this.body);
@@ -55,8 +60,9 @@ class CameraController extends Component {
       forwardVelocity * this.movementSpeed * elapsedTime
     );
     this.controls.moveRight(strafeVelocity * this.movementSpeed * elapsedTime);
-  
+
     this.position.copy(this.controls.getObject().position);
+    this.light.position.copy(this.position);
   }
 }
 
