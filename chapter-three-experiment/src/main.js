@@ -1,12 +1,4 @@
-// index.js
-import { LevelBuilder } from "./classes/lever-builder";
-import { PhysicsController } from "./classes/physics-controller";
-import { ThreeJSController } from "./classes/threejs-component";
-import { CameraController } from "./classes/camera-controller";
 import * as THREE from "three";
-import * as CANNON from "cannon-es";
-import CannonDebugger from "cannon-es-debugger";
-import { ShooterController } from "./classes/shooter-controller";
 import { SceneManager } from "./scenes/SceneManager";
 import { DependencyContainer } from "./core/DependencyContainer";
 
