@@ -1,4 +1,5 @@
 import * as THREE from "three";
+
 class Entity {
   constructor() {
     this.name = null;
@@ -12,6 +13,7 @@ class Entity {
     this.rotation = new THREE.Quaternion();
     this.dead = false;
   }
+
   get Id() {
     return this.id;
   }
@@ -25,35 +27,16 @@ class Entity {
   get Position() {
     return this.position;
   }
-
   get Rotation() {
     return this.rotation;
   }
-  Destroy() {
+  destroy() {
+    this.dead = true;
     for (let k in this.components) {
       this.components[k].Destroy();
     }
     this.components = null;
     this.parent = null;
-  }
-
-  SetParent(p) {
-    this.parent = p;
-  }
-
-  SetName(n) {
-    this.name = n;
-  }
-
-  SetId(id) {
-    this.id = id;
-  }
-  SetPosition(p) {
-    this.position.copy(p);
-  }
-
-  SetRotation(r) {
-    this.rotation.copy(r);
   }
 }
 

@@ -1,10 +1,7 @@
 import * as CANNON from "cannon-es";
-import * as THREE from "three";
-import { Component } from "./component";
 
-class PhysicsController extends Component {
+class PhysicsWorld {
   constructor() {
-    super();
     this.world = new CANNON.World();
     this.bodies = [];
     this.world.gravity.set(0, -9.82, 0);
@@ -21,10 +18,23 @@ class PhysicsController extends Component {
     this.world.step(delta);
   }
 
+  removeBody(body) {
+    this.world.removeBody(body);
+    this.bodies.splice(this.bodies.indexOf(body), 1);
+  }
+
   addBody(body) {
     this.world.addBody(body);
     this.bodies.push(body);
   }
+
+  getWorld() {
+    return this.world;
+  }
+
+  getBodies() {
+    return this.bodies;
+  }
 }
 
-export { PhysicsController };
+export { PhysicsWorld };

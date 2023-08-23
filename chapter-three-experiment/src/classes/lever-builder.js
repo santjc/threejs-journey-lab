@@ -4,10 +4,10 @@ import { Component } from "./component";
 import { createNoise2D } from "simplex-noise";
 
 class LevelBuilder extends Component {
-  constructor(scene, physicsWorld) {
+  constructor(scene, world) {
     super();
     this.scene = scene;
-    this.physicsWorld = physicsWorld;
+    this.world = world;
     this.textureLoader = new THREE.TextureLoader();
   }
 
@@ -20,13 +20,13 @@ class LevelBuilder extends Component {
     box.position.set(0, 2, -5);
     this.scene.add(box);
 
-    if (this.physicsWorld) {
+    if (this.world) {
       //box
       const boxShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
-      const boxBody = new CANNON.Body({ mass: 1, shape: boxShape });
+      const boxBody = new CANNON.Body({ mass: 5, shape: boxShape });
       boxBody.position.set(0, 2, -5);
       boxBody.threeMesh = box;
-      this.physicsWorld.addBody(boxBody);
+      this.world.addBody(boxBody);
     }
 
     this.addLight();
@@ -38,35 +38,45 @@ class LevelBuilder extends Component {
     terrainTexture.magFilter = THREE.NearestFilter;
     terrainTexture.minFilter = THREE.LinearMipMapLinearFilter;
     //Make texture smaller
-    terrainTexture.repeat.set(50, 50);
+    terrainTexture.repeat.set(16, 16);
     terrainTexture.wrapS = THREE.RepeatWrapping;
     terrainTexture.wrapT = THREE.RepeatWrapping;
     const terrainNormalTexture = this.textureLoader.load(
       "/textures/dirtNormal.jpg"
     );
+    terrainNormalTexture.repeat.set(16, 16);
+    terrainNormalTexture.wrapS = THREE.RepeatWrapping;
+    terrainNormalTexture.wrapT = THREE.RepeatWrapping;
+
     const terrainRoughnessTexture = this.textureLoader.load(
       "/textures/dirtRoughness.jpg"
     );
+    terrainRoughnessTexture.repeat.set(16, 16);
+    terrainRoughnessTexture.wrapS = THREE.RepeatWrapping;
+    terrainRoughnessTexture.wrapT = THREE.RepeatWrapping;
+
     const terrainHeightTexture = this.textureLoader.load(
       "/textures/dirtHeight.png"
     );
+    terrainHeightTexture.repeat.set(16, 16);
+    terrainHeightTexture.wrapS = THREE.RepeatWrapping;
+    terrainHeightTexture.wrapT = THREE.RepeatWrapping;
+
     const terrainAmbientOcclusionTexture = this.textureLoader.load(
       "/textures/dirtAO.jpg"
     );
+    terrainAmbientOcclusionTexture.repeat.set(16, 16);
+    terrainAmbientOcclusionTexture.wrapS = THREE.RepeatWrapping;
+    terrainAmbientOcclusionTexture.wrapT = THREE.RepeatWrapping;
 
-    const terrainGeometry = new THREE.PlaneGeometry(50, 50, 128, 128);
+    const terrainGeometry = new THREE.PlaneGeometry(50, 50, 16, 16);
     const terrainMaterial = new THREE.MeshStandardMaterial({
       color: 0x74663b,
-      wireframe: false,
       map: terrainTexture,
       normalMap: terrainNormalTexture,
       roughnessMap: terrainRoughnessTexture,
-      displacementMap: terrainHeightTexture,
       aoMap: terrainAmbientOcclusionTexture,
-      displacementScale: 0.1,
       aoMapIntensity: 1,
-      roughness: 1,
-      metalness: 0,
     });
     const noise2D = createNoise2D();
 
@@ -82,7 +92,7 @@ class LevelBuilder extends Component {
     for (let i = 0; i < positionAttribute.count; i++) {
       const vertex = new THREE.Vector3();
       vertex.fromBufferAttribute(positionAttribute, i);
-      vertex.z = noise2D(vertex.x, vertex.y) * 0.1;
+      vertex.z = noise2D(vertex.x, vertex.y);
       positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
     }
     positionAttribute.needsUpdate = true;
@@ -94,39 +104,22 @@ class LevelBuilder extends Component {
     terrain.position.y = -1;
     this.scene.add(terrain);
 
-    if (this.physicsWorld) {
-      const heightFieldMatrix = [];
-      for (let i = 0; i < terrainGeometry.parameters.heightSegments + 1; i++) {
-        heightFieldMatrix.push([]);
-        for (let j = 0; j < terrainGeometry.parameters.widthSegments + 1; j++) {
-          heightFieldMatrix[i].push(
-            terrainGeometry.attributes.position.getZ(
-              i * (terrainGeometry.parameters.heightSegments + 1) + j
-            )
-          );
-        }
-      }
-
-      const terrainShape = new CANNON.Heightfield(heightFieldMatrix, {
-        elementSize: 1,
-      });
-      const terrainBody = new CANNON.Body({ mass: 0, shape: terrainShape });
-      terrainBody.position.set(
-        -terrainGeometry.parameters.width / 2,
-        -1,
-        terrainGeometry.parameters.height / 2
-      );
+    if (this.world) {
+      const terrainShape = new CANNON.Plane();
+      const terrainBody = new CANNON.Body({ mass: 0 });
+      terrainBody.threeMesh = terrain;
+      terrainBody.addShape(terrainShape);
       terrainBody.quaternion.setFromAxisAngle(
-        new CANNON.Vec3(1, 0, 0),
-        -Math.PI / 2
+        new CANNON.Vec3(-1, 0, 0),
+        Math.PI / 2
       );
-
-      this.physicsWorld.addBody(terrainBody);
+      terrainBody.position.y = -1;
+      this.world.addBody(terrainBody);
     }
   }
 
   addLight() {
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     this.scene.add(ambientLight);
 
     const moonLight = new THREE.DirectionalLight(0x0055a5, 0.7);

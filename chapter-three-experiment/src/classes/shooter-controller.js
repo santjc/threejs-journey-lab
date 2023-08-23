@@ -3,12 +3,12 @@ import { Component } from "./component";
 import * as THREE from "three";
 
 class ShooterController extends Component {
-  constructor(camera, scene, physicsWorld) {
+  constructor(camera, scene, world) {
     super();
     this.camera = camera;
     this.scene = scene;
     console.log(this.camera.position, "log");
-    this.physicsWorld = physicsWorld;
+    this.world = world;
     this.bullets = [];
   }
 
@@ -17,7 +17,7 @@ class ShooterController extends Component {
       this.camera.position.clone(),
       this.camera,
       this.scene,
-      this.physicsWorld
+      this.world
     );
 
     this.bullets.push(bullet);
