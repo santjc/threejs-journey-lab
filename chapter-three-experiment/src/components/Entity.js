@@ -8,9 +8,6 @@ class Entity {
 
     this.attributes = {};
     this.components = {};
-
-    this.position = new THREE.Vector3();
-    this.rotation = new THREE.Quaternion();
     this.dead = false;
   }
 
@@ -30,6 +27,11 @@ class Entity {
   get Rotation() {
     return this.rotation;
   }
+  addComponent(c) {
+    this.components[c.constructor.name] = c;
+    c.SetEntity(this);
+  }
+
   destroy() {
     this.dead = true;
     for (let k in this.components) {

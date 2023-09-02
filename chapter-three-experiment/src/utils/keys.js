@@ -4,4 +4,5 @@ export const KEYS = {
   w: 87,
   d: 68,
   shift: 16,
+  space: 32,
 };

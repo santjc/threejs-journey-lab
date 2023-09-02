@@ -1,14 +1,13 @@
+import { Component } from "../components/Component";
 import { Entity } from "../components/Entity";
 
-class SceneManager {
+class SceneManager extends Component {
   constructor() {
+    super()
     this.entities = {};
     this.meshes = {};
-    this.scene = null;
     this.inputController = null;
     this.cameraController = null;
-    this.camera = null;
-    this.world = null;
   }
 
   setScene(s) {
