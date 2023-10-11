@@ -3,7 +3,7 @@ import { Entity } from "../components/Entity";
 
 class SceneManager extends Component {
   constructor() {
-    super()
+    super();
     this.entities = {};
     this.meshes = {};
     this.inputController = null;
@@ -22,6 +22,12 @@ class SceneManager extends Component {
 
   setCamera(c) {
     this.camera = c;
+  }
+  setBackground(c) {
+    this.scene.background = c;
+  }
+  setEnvironment(c) {
+    this.scene.environment = c;
   }
   setWorld(w) {
     this.world = w;

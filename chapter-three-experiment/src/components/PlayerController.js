@@ -32,6 +32,11 @@ class PlayerController extends Component {
     bullet.Instanciate();
     this.scene.add(bullet.mesh);
     this.world.addBody(bullet.body);
+
+    setTimeout(() => {
+      this.scene.remove(bullet.mesh);
+      this.world.removeBody(bullet.body);
+    }, 3000);
   }
 
   Update(elapsedTime) {

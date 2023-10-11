@@ -1,6 +1,9 @@
 import { CameraController } from "../components/CameraController";
 import { InputController } from "./InputController";
 import { PhysicsWorld } from "./PhysicsWorld";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
+
 import * as THREE from "three";
 class DependencyContainer {
   constructor() {
@@ -12,6 +15,10 @@ class DependencyContainer {
     this.renderer = null;
     this.world = null;
     this.entityManager = null;
+    this.textureLoader = null;
+    this.gltfLoader = null;
+    this.cubeTextureLoader = null;
+    this.RGBELoader = null;
   }
 
   init() {
@@ -32,6 +39,19 @@ class DependencyContainer {
     this.inputController = new InputController();
   }
 
+  setTextureLoader() {
+    this.textureLoader = new THREE.TextureLoader();
+  }
+
+  setGLTFLoader() {
+    this.gltfLoader = new GLTFLoader();
+  }
+  setCubeTextureLoader() {
+    this.cubeTextureLoader = new THREE.CubeTextureLoader();
+  }
+  setRGBELoader() {
+    this.RGBELoader = new RGBELoader();
+  }
   setCameraController() {
     this.cameraController = new CameraController();
     this.cameraController.setCamera(this.camera);

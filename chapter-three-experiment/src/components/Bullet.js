@@ -27,11 +27,10 @@ class Bullet extends Component {
       Math.atan2(-this.direction.x, -this.direction.z)
     );
     this.body.velocity.set(
-        this.direction.x * 10,
-        this.direction.y * 10,
-        this.direction.z * 10
+      this.direction.x * 10,
+      this.direction.y * 10,
+      this.direction.z * 10
     );
-    
 
     this.body.threeMesh = this.mesh;
     this.body.position.copy(this.position);
