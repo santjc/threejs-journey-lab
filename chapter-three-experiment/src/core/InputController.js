@@ -1,5 +1,8 @@
-class InputController {
+import { Component } from "../components/Component";
+
+class InputController extends Component {
   constructor() {
+    super();
     this.Init();
   }
 

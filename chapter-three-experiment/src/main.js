@@ -34,7 +34,6 @@ class ExperimentThree {
     this.playerController.setCamera(this.dependencies.camera);
     this.playerController.setScene(this.dependencies.scene);
     this.playerController.setWorld(this.dependencies.world);
-    this.textureLoader = this.dependencies.textureLoader;
     this.cubeTextureLoader = this.dependencies.cubeTextureLoader;
     this.gltfLoader = this.dependencies.gltfLoader;
     this.RGBELoader = this.dependencies.RGBELoader;
@@ -47,10 +46,12 @@ class ExperimentThree {
       this.scene.getScene().traverse((child) => {
         if (child.isMesh && child.material.isMeshStandardMaterial) {
           if (child.name === "SciFiHelmet") {
-            child.material.envMapIntensity = 3;
+            child.material.envMapIntensity = 1;
           } else {
-            child.material.envMapIntensity = 1.5;
+            child.material.envMapIntensity = 1;
           }
+          child.castShadow = true;
+          child.receiveShadow = true;
         }
       });
     };
@@ -61,10 +62,31 @@ class ExperimentThree {
       this.scene.setEnvironment(map);
       this.scene.getScene().backgroundBlurriness = 1;
     });
+    // Directional light
+    const directionalLight = new THREE.DirectionalLight("#ea00d9", 2);
+    directionalLight.position.set(-2.5, 2.5, 2.5);
+    directionalLight.castShadow = true;
+    directionalLight.target.position.set(0, 0.5, 0);
+    directionalLight.shadow.camera.far = 10;
+    directionalLight.shadow.mapSize.set(1024, 1024);
+    directionalLight.target.updateWorldMatrix();
+    this.scene.addMesh(directionalLight);
+
+    const directionalLightCameraHelper = new THREE.CameraHelper(
+      directionalLight.shadow.camera
+    );
+    this.scene.addMesh(directionalLightCameraHelper);
 
     this.gltfLoader.load("/models/helmet/SciFiHelmet.gltf", (gltf) => {
+      const boundingBox = new CANNON.Box(new CANNON.Vec3(1.5, 5, 1.5));
+      const helmetBody = new CANNON.Body({
+        mass: 0,
+        shape: boundingBox,
+        position: new CANNON.Vec3(0, 0, 0),
+      });
+      this.dependencies.world.addBody(helmetBody);
       this.scene.addMesh(gltf.scene);
-      gltf.scene.position.set(0, 0, -10);
+      gltf.scene.position.set(0, 0, 0);
       updateAllMaterials();
     });
 
@@ -73,15 +95,13 @@ class ExperimentThree {
     const groundShape = new CANNON.Plane();
     const groundBody = new CANNON.Body({ mass: 0, material: groundMaterial });
     groundBody.addShape(groundShape);
-    groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+    groundBody.quaternion.setFromEuler(Math.PI / 2, 0, 0);
     groundBody.position.set(0, -1, 0);
 
     const plane = new THREE.Mesh(
       new THREE.PlaneGeometry(50, 50),
       new THREE.MeshStandardMaterial({
-        color: 0xf5f5dc,
-        metalness: 0.3,
-        roughness: 0.4,
+        color: "#ffffff",
       })
     );
     plane.rotation.set(-Math.PI / 2, 0, 0);

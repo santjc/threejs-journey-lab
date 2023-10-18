@@ -1,9 +1,8 @@
 import { Entity } from "./Entity";
 import * as THREE from "three";
 
-class Component extends Entity {
+class Component {
   constructor() {
-    super();
     this.entity = null;
     this.camera = null;
     this.scene = null;

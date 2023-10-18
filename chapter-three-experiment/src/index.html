@@ -8,7 +8,32 @@
   </head>
   <body>
     <canvas id="canvas" class="webgl"></canvas>
+    <div class="info-box">
+      <p>SPACE to shoot</p>
+      <p>SHIFT to run</p>
+    </div>
 
     <script type="module" src="./main.js"></script>
   </body>
 </html>
+<style>
+  .info-box {
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    border: 1px solid #000;
+    margin: 8px;
+    border-radius: 4px;
+    background-color: #fff;
+    opacity: 0.5;
+  }
+
+  .info-box p {
+    padding: 8px 16px;
+  }
+  .info-box p:first-child {
+    border-bottom: 1px solid #000;
+  }
+</style>

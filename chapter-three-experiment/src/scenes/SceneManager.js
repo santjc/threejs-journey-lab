@@ -1,5 +1,4 @@
 import { Component } from "../components/Component";
-import { Entity } from "../components/Entity";
 
 class SceneManager extends Component {
   constructor() {
