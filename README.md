@@ -25,7 +25,8 @@ This chapter focuses on applying lighting to scenes, as well as using textures a
 
 **Experiment: First Person Shooter Sandbox with Physics**
 - Folder: `chapter-three-experiment`
-- Description: In this experiment, an object-oriented approach is implemented to create a first person shooter camera and sandbox. Classes and inheritance are used to structure the code in a more organized manner. Additionally, physics are integrated using the Cannon-es library to simulate movement and interactions of objects in the scene.
+- Description: In this experiment, an object-oriented approach is implemented to create a realistic render, with environment maps, shooting physics. 
+- Classes and inheritance are used to structure the code in a more organized manner. Additionally, physics are integrated using the Cannon-es library to simulate movement and interactions of objects in the scene.
 
 ## How to Use the Experiments
 
