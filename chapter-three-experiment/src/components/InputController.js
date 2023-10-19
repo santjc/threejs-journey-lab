@@ -1,6 +1,6 @@
-import { Component } from "../components/Component";
+import Component from "../core/Component";
 
-class InputController extends Component {
+export default class InputController extends Component {
   constructor() {
     super();
     this.Init();
@@ -74,4 +74,3 @@ class InputController extends Component {
     this.previous = { ...this.current };
   }
 }
-export { InputController };

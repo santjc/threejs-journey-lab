@@ -1,20 +1,20 @@
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
-import { Component } from "./Component";
 import { KEYS } from "../utils/keys.js";
+import Component from "../core/Component";
+import InputController from "./InputController.js";
 
-class CameraController extends Component {
+export default class CameraController extends Component {
   constructor() {
     super();
-    this.canvas = null;
-    this.inputController = null;
-    this.controls = null;
+    this.inputController = new InputController();
+    this.controls = new PointerLockControls(this.camera, this.canvas);
   }
 
   setCanvas(c) {
     this.canvas = c;
   }
-  setControls() {
-    this.controls = new PointerLockControls(this.camera, this.canvas);
+  setControls(c) {
+    this.controls = c;
   }
 
   setInputController(i) {
@@ -40,5 +40,3 @@ class CameraController extends Component {
     this.position.copy(this.controls.getObject().position);
   }
 }
-
-export { CameraController };

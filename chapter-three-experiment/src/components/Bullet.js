@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
-import { Entity } from "./Entity";
-class Bullet extends Entity {
+import Entity from "../core/Entity";
+export default class Bullet extends Entity {
   constructor(position, camera, scene, world) {
     super();
     this.body = null;
@@ -36,4 +36,3 @@ class Bullet extends Entity {
     this.body.position.copy(this.position);
   }
 }
-export { Bullet };
