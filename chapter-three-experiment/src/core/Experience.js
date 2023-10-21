@@ -27,10 +27,10 @@ export default class Experience {
     this.sizes = new Sizes();
     this.time = new Time();
     this.scene = new THREE.Scene();
+    this.world = new PhysicsWorld();
     this.resources = new Resources(sources);
     this.camera = new Camera();
     this.renderer = new Renderer();
-    this.world = new PhysicsWorld();
     this.sceneManager = new MainScene();
 
     // Resize event
@@ -52,8 +52,9 @@ export default class Experience {
   update() {
     this.camera.update();
     this.camera.updatePosition(this.time.delta);
-    this.world.update(this.time.delta);
     this.renderer.update();
+    this.world.updateBodies();
+    this.world.step();
   }
 
   destroy() {

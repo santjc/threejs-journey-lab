@@ -36,6 +36,10 @@ export default class Entity {
     return Object.keys(this.components);
   }
 
+  setName(name) {
+    this.name = name;
+  }
+
   destroy() {
     this.dead = true;
   }

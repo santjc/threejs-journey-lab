@@ -1,23 +1,39 @@
 import * as CANNON from "cannon-es";
 import Experience from "../Experience.js";
+import CannonDebugger from "cannon-es-debugger";
 
 export default class PhysicsWorld {
   constructor() {
     this.experience = new Experience();
     this.world = new CANNON.World();
+    this.scene = this.experience.scene;
     this.bodies = [];
     this.world.gravity.set(0, -9.82, 0);
+    this.setDebug();
   }
 
-  update(delta) {
+  updateBodies() {
     this.bodies.forEach((body) => {
-      if (body.threeMesh) {
-        body.threeMesh.position.copy(body.position);
-        body.threeMesh.quaternion.copy(body.quaternion);
+      if (body.name === "PhysicsBody") {
+        body.update();
       }
     });
 
-    this.world.step(delta);
+    if (this.debug.active) {
+      this.physicsDebugger.update();
+    }
+  }
+
+  step() {
+    this.world.fixedStep();
+  }
+
+  //debug mode
+  setDebug() {
+    this.debug = this.experience.debug;
+
+    if (this.debug.active)
+      this.physicsDebugger = new CannonDebugger(this.scene, this.world);
   }
 
   removeBody(body) {
@@ -27,6 +43,11 @@ export default class PhysicsWorld {
 
   addBody(body) {
     this.world.addBody(body);
+    this.bodies.push(body);
+  }
+
+  addPhysicsBody(body) {
+    this.world.addBody(body.cannonBody);
     this.bodies.push(body);
   }
 

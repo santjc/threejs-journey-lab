@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import Experience from "../../core/Experience";
 import { Body, Plane, Vec3 } from "cannon-es";
+import PhysicsBody from "../../core/physics/Body";
 
 export default class Floor {
   constructor() {
@@ -14,6 +15,7 @@ export default class Floor {
     this.setMaterial();
     this.setMesh();
     this.setPhysicsBody();
+    this.addToWorld();
   }
 
   setGeometry() {
@@ -27,10 +29,14 @@ export default class Floor {
       position: new Vec3(0, 0, 0),
     });
     this.physicsBody.quaternion.setFromAxisAngle(
-      new Vec3(-1, 0, 0),
-      Math.PI * 0.5
+      new Vec3(1, 0, 0),
+      -Math.PI * 0.5
     );
-    this.world.addBody(this.physicsBody);
+  }
+
+  addToWorld() {
+    const plane = new PhysicsBody(this.mesh, this.physicsBody);
+    this.world.addPhysicsBody(plane);
   }
 
   setTextures() {
@@ -57,6 +63,7 @@ export default class Floor {
 
   setMesh() {
     this.mesh = new THREE.Mesh(this.geometry, this.material);
+    this.mesh.position.y = -0.5;
     this.mesh.rotation.x = -Math.PI * 0.5;
     this.mesh.receiveShadow = true;
     this.scene.add(this.mesh);

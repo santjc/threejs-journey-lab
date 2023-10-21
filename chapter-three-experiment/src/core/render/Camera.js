@@ -1,14 +1,17 @@
 import * as THREE from "three";
+import * as CANNON from "cannon-es";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls.js";
 import Experience from "../Experience";
 import EventEmitter from "../utilities/EventEmitter";
 import { KEYS } from "../../utils/keys";
 import InputController from "../components/InputController";
+import PhysicsBody from "../physics/Body";
 
 export default class Camera extends EventEmitter {
   constructor() {
     super();
     this.experience = new Experience();
+    this.world = this.experience.world;
     this.sizes = this.experience.sizes;
     this.scene = this.experience.scene;
     this.canvas = this.experience.canvas;
@@ -19,6 +22,7 @@ export default class Camera extends EventEmitter {
     this.setInstance();
     this.setControls();
     this.setInputController();
+    this.setBoundingBox();
   }
 
   setInstance() {
@@ -39,6 +43,22 @@ export default class Camera extends EventEmitter {
     });
   }
 
+  setBoundingBox() {
+    const body = new CANNON.Body({
+      mass: 1,
+      fixedRotation: true,
+      position: new CANNON.Vec3(0, 1, 0),
+      shape: new CANNON.Box(new CANNON.Vec3(0.5, 1, 0.5)),
+    });
+
+    const mesh = new THREE.Mesh();
+
+    body.threeMesh = mesh;
+    const cameraBody = new PhysicsBody(mesh, body);
+    this.boundingBox = cameraBody;
+    this.world.addPhysicsBody(cameraBody);
+  }
+
   setInputController() {
     this.inputController = new InputController();
   }
@@ -51,10 +71,10 @@ export default class Camera extends EventEmitter {
     const moveDirection = new THREE.Vector3(0, 0, 0);
 
     if (this.inputController.key(KEYS.w)) {
-      moveDirection.z = -1;
+      moveDirection.z = 1;
     }
     if (this.inputController.key(KEYS.s)) {
-      moveDirection.z = 1;
+      moveDirection.z = -1;
     }
     if (this.inputController.key(KEYS.a)) {
       moveDirection.x = -1;
@@ -82,6 +102,9 @@ export default class Camera extends EventEmitter {
     }
 
     this.instance.position.copy(this.controls.getObject().position);
+    this.boundingBox.cannonBody.position.copy(
+      this.controls.getObject().position
+    );
   }
   update() {}
 }

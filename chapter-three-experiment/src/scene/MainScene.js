@@ -13,6 +13,7 @@ export default class MainScene {
       // Setup
       this.floor = new Floor();
       this.environment = new Environment();
+      this.sphere = this.environment.createSphere();
     });
   }
 

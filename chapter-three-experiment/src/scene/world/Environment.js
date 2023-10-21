@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
 import Experience from "../../core/Experience";
+import PhysicsBody from "../../core/physics/Body";
 
 export default class Environment {
   constructor() {
@@ -18,6 +19,22 @@ export default class Environment {
     this.setEnvironmentMap();
   }
 
+  createSphere() {
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.5, 16, 16),
+      new THREE.MeshStandardMaterial({
+        color: "#ffffff",
+      })
+    );
+    mesh.castShadow = true;
+    const body = new CANNON.Body({
+      mass: 1,
+      position: new CANNON.Vec3(0, 3, -3),
+      shape: new CANNON.Sphere(0.5),
+    });
+    const SphereBody = new PhysicsBody(mesh, body);
+    this.world.addPhysicsBody(SphereBody);
+  }
   setSunLight() {
     this.sunLight = new THREE.DirectionalLight("#ffffff", 4);
     this.sunLight.castShadow = true;
