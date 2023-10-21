@@ -21,9 +21,9 @@ export default class InputController extends Component {
     this.previous = null;
     this.keys = {};
     this.previousKeys = {};
+
     window.addEventListener("keydown", (e) => this.onKeyDown(e), false);
     window.addEventListener("keyup", (e) => this.onKeyUp(e), false);
-    window.addEventListener("mousemove", (e) => this.onMouseMove(e), false);
     window.addEventListener("mousedown", (e) => this.onMouseDown(e), false);
     window.addEventListener("mouseup", (e) => this.onMouseUp(e), false);
   }

@@ -12,6 +12,7 @@
       <p>SPACE to shoot</p>
       <p>SHIFT to run</p>
     </div>
+    <div class="crosshair" />
 
     <script type="module" src="./script.js"></script>
   </body>
@@ -27,6 +28,18 @@
     margin: 8px;
     border-radius: 4px;
     background-color: #fff;
+    opacity: 0.5;
+  }
+
+  .crosshair {
+    display: flex;
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #fff;
+    border-radius: 50%;
     opacity: 0.5;
   }
 

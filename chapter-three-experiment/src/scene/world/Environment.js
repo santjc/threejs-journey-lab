@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import * as CANNON from "cannon-es";
 import Experience from "../../core/Experience";
 
 export default class Environment {
@@ -6,6 +7,7 @@ export default class Environment {
     this.experience = new Experience();
     this.scene = this.experience.scene;
     this.resources = this.experience.resources;
+    this.world = this.experience.world;
     this.debug = this.experience.debug;
     // Debug
     if (this.debug.active) {

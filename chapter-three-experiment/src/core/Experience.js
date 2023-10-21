@@ -52,7 +52,7 @@ export default class Experience {
   update() {
     this.camera.update();
     this.camera.updatePosition(this.time.delta);
-    //this.world.update(this.time.delta);
+    this.world.update(this.time.delta);
     this.renderer.update();
   }
 

@@ -48,16 +48,39 @@ export default class Camera extends EventEmitter {
     this.instance.updateProjectionMatrix();
   }
   updatePosition(elapsedTime) {
-    const forwardVelocity =
-      (this.inputController.key(KEYS.w) ? 1 : 0) +
-      (this.inputController.key(KEYS.s) ? -1 : 0);
-    const strafeVelocity =
-      (this.inputController.key(KEYS.d) ? 1 : 0) +
-      (this.inputController.key(KEYS.a) ? -1 : 0);
+    const moveDirection = new THREE.Vector3(0, 0, 0);
+
+    if (this.inputController.key(KEYS.w)) {
+      moveDirection.z = -1;
+    }
+    if (this.inputController.key(KEYS.s)) {
+      moveDirection.z = 1;
+    }
+    if (this.inputController.key(KEYS.a)) {
+      moveDirection.x = -1;
+    }
+    if (this.inputController.key(KEYS.d)) {
+      moveDirection.x = 1;
+    }
+
+    moveDirection.normalize();
+
     this.controls.moveForward(
-      forwardVelocity * this.movementSpeed * elapsedTime
+      moveDirection.z * this.movementSpeed * elapsedTime
     );
-    this.controls.moveRight(strafeVelocity * this.movementSpeed * elapsedTime);
+    this.controls.moveRight(moveDirection.x * this.movementSpeed * elapsedTime);
+
+    // if space press, jump
+    if (this.inputController.key(KEYS.space)) {
+      this.controls.getObject().position.y += this.jumpHeight * 1.25;
+    }
+
+    // add gravity but constrain Y position to 1
+    this.controls.getObject().position.y -= this.jumpHeight * 0.5;
+    if (this.controls.getObject().position.y < 1) {
+      this.controls.getObject().position.y = 1;
+    }
+
     this.instance.position.copy(this.controls.getObject().position);
   }
   update() {}
