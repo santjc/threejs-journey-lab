@@ -1,5 +1,6 @@
-import { Sphere } from "three";
 import Experience from "../core/Experience.js";
+import Environment from "./world/Environment.js";
+import Floor from "./world/Floor.js";
 
 export default class MainScene {
   constructor() {
@@ -10,7 +11,8 @@ export default class MainScene {
     // Wait for resources
     this.resources.on("ready", () => {
       // Setup
-      this.floor = new Sphere();
+      this.floor = new Floor();
+      this.environment = new Environment();
     });
   }
 
